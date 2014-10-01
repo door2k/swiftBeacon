@@ -9,21 +9,62 @@
 import UIKit
 import CoreLocation
 
+
+class beacon {
+    var uuid:String = ""
+    var identifier:String = ""
+    var beaconUUID:NSUUID?
+    var region:CLBeaconRegion?
+    
+    init (uuid: String, identifier:String = "Xoom") {
+        self.uuid = uuid
+        self.identifier = identifier
+    }
+
+}
+
+class beaconHandler {
+    var list:[beacon] = []
+    var beaconDictionary:[String:Int] = [:]
+    
+    func register (locationManager: CLLocationManager?) {
+        for currBeacon in list {
+            NSLog(currBeacon.uuid)
+            
+            var region: CLBeaconRegion = CLBeaconRegion(proximityUUID:  NSUUID(UUIDString: currBeacon.uuid), identifier:     currBeacon.identifier)
+            
+            locationManager!.startMonitoringForRegion(region)
+            locationManager!.startRangingBeaconsInRegion(region)
+            
+        }
+
+    }
+    
+    func add (newBeacon : beacon) {
+        if beaconDictionary[newBeacon.uuid] == nil {
+            self.list += [newBeacon]
+            beaconDictionary[newBeacon.uuid] = 0
+        }
+    }
+}
+
+
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate {
 
     var window: UIWindow?
     var locationManager: CLLocationManager?
 
+    let uuidString = "B0702880-A295-A8AB-F734-031A98A512DE"
+    let uuidString2 = "B0702880-A295-A8AB-F734-031A98A512DD"
 
+    var hBeacons: beaconHandler = beaconHandler()
+    
+    
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool
     {
-        
-        let uuidString = "B0702880-A295-A8AB-F734-031A98A512DE"
-        let beaconIdentifier = "test"
-        let beaconUUID:NSUUID = NSUUID(UUIDString: uuidString)
-        let beaconRegion:CLBeaconRegion = CLBeaconRegion(proximityUUID: beaconUUID,
-            identifier: beaconIdentifier)
+        hBeacons.add(beacon(uuid: uuidString, identifier: "test1"))
+        hBeacons.add(beacon(uuid: uuidString2, identifier: "test2"))
         
         locationManager = CLLocationManager()
         if(locationManager!.respondsToSelector("requestAlwaysAuthorization")) {
@@ -32,10 +73,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
         
         locationManager!.delegate = self
         locationManager!.pausesLocationUpdatesAutomatically = false
+//        
+//        var tempbeacon: CLBeaconRegion = CLBeaconRegion(proximityUUID:  NSUUID(UUIDString: self.uuidString),
+//                                                        identifier:     "test")
+//        locationManager!.startMonitoringForRegion(tempbeacon)
+//        locationManager!.startRangingBeaconsInRegion(tempbeacon)
         
-        locationManager!.startMonitoringForRegion(beaconRegion)
-        locationManager!.startRangingBeaconsInRegion(beaconRegion)
-        locationManager!.startUpdatingLocation()
+        hBeacons.register(locationManager!)
         
         if(application.respondsToSelector("registerUserNotificationSettings:")) {
             application.registerUserNotificationSettings(
@@ -46,6 +90,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
             )
         }
         
+//        application.applicationIconBadgeNumber = 0
         return true
     }
 
@@ -88,30 +133,43 @@ extension AppDelegate: CLLocationManagerDelegate {
     func locationManager(manager: CLLocationManager!,
         didRangeBeacons beacons: [AnyObject]!,
         inRegion region: CLBeaconRegion!) {
-            NSLog("didRangeBeacons");
+            
+//            NSLog("didRangeBeacons");
             var message:String = ""
-            var newState = 0
+            var gotReport:Bool = false
+            
             if(beacons.count > 0) {
-                let nearestBeacon:CLBeacon = beacons[0] as CLBeacon
-                newState = 1
-                switch nearestBeacon.proximity {
-                case CLProximity.Far:
-                    message = "You are far away from the beacon"
-                case CLProximity.Near:
-                    message = "You are near the beacon"
-                case CLProximity.Immediate:
-                    message = "You are in the immediate proximity of the beacon"
-                case CLProximity.Unknown:
-                    return
-                }
-            } else {
-                message = "No beacons are nearby"
-                newState = 0
+                NSLog("beacons.count = \(beacons.count)")
             }
-            NSLog("%@", message)
-            if (newState != state) {
+            
+            for (currBeacon: beacon) in hBeacons.list {
+                if (currBeacon.identifier == region.identifier) {
+                    let prevState = hBeacons.beaconDictionary[currBeacon.uuid]
+                    hBeacons.beaconDictionary[currBeacon.uuid] = 0 // start from "beacon not found" and set to 1 if found.
+//                    NSLog("Examinig beacon: \(currBeacon.uuid)")
+                    for visibleBeacon in beacons {
+                        var s: NSString = visibleBeacon.proximityUUID.description
+                        NSLog(s.substringFromIndex(s.length - 36))
+                        if currBeacon.uuid == s.substringFromIndex(s.length - 36) {
+                            hBeacons.beaconDictionary[currBeacon.uuid] = 1
+                            if prevState == 0 {
+                                message += "beacon: \(currBeacon.uuid) is visible\n"
+                                gotReport = true
+                            }
+                        }
+                    }
+                    
+                    if prevState == 1 && hBeacons.beaconDictionary[currBeacon.uuid] == 0 {
+                        message += "beacon: \(currBeacon.uuid) is no longer visible\n"
+                        gotReport = true
+                    }
+                }
+            }
+            
+            if gotReport {
+                NSNotificationCenter.defaultCenter().postNotification(NSNotification(name: "beaconsUpdate", object: nil))
+                NSLog("%@", message)
                 sendLocalNotificationWithMessage(message)
             }
-            state = newState
     }
 }
