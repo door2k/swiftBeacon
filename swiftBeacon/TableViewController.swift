@@ -71,7 +71,7 @@ class TableViewController: UITableViewController {
             cell?.textLabel?.text = "...\((aVariable.list[indexPath.row].uuid as NSString).substringFromIndex(16))"
             cell?.textLabel?.font = UIFont.systemFontOfSize(16)
             
-            if aVariable.beaconDictionary[aVariable.list[indexPath.row].uuid] == 1 {
+            if aVariable.beaconDictionary[aVariable.list[indexPath.row]] == 1 {
                     cell?.textLabel?.font = UIFont.boldSystemFontOfSize(16)
             }
         } else {

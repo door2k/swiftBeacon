@@ -10,22 +10,34 @@ import UIKit
 import CoreLocation
 
 
-class beacon {
+func ==(lhs: beacon, rhs: beacon) -> Bool {
+    return lhs.hashValue == rhs.hashValue
+}
+
+class beacon : Hashable {
     var uuid:String = ""
     var identifier:String = ""
-    var beaconUUID:NSUUID?
-    var region:CLBeaconRegion?
+    var minor = 0
+    var major = 0
     
     init (uuid: String, identifier:String = "Xoom") {
         self.uuid = uuid
         self.identifier = identifier
+        self.major = 0
+        self.minor = 0
+    }
+    
+    var hashValue: Int {
+        get {
+            return self.uuid.hashValue
+        }
     }
 
 }
 
 class beaconHandler {
     var list:[beacon] = []
-    var beaconDictionary:[String:Int] = [:]
+    var beaconDictionary:[beacon:Int] = [:]
     
     func register (locationManager: CLLocationManager?) {
         for currBeacon in list {
@@ -41,9 +53,9 @@ class beaconHandler {
     }
     
     func add (newBeacon : beacon) {
-        if beaconDictionary[newBeacon.uuid] == nil {
+        if beaconDictionary[newBeacon] == nil {
             self.list += [newBeacon]
-            beaconDictionary[newBeacon.uuid] = 0
+            beaconDictionary[newBeacon] = 0
         }
     }
 }
@@ -143,12 +155,12 @@ extension AppDelegate: CLLocationManagerDelegate {
             
             for (currBeacon: beacon) in hBeacons.list {
                 if (currBeacon.identifier == region.identifier) {
-                    let prevState = hBeacons.beaconDictionary[currBeacon.uuid]
-                    hBeacons.beaconDictionary[currBeacon.uuid] = 0
+                    let prevState = hBeacons.beaconDictionary[currBeacon]
+                    hBeacons.beaconDictionary[currBeacon] = 0
                     for visibleBeacon in beacons {
                         var s: NSString = visibleBeacon.proximityUUID.description
                         if currBeacon.uuid == s.substringFromIndex(s.length - 36) {
-                            hBeacons.beaconDictionary[currBeacon.uuid] = 1
+                            hBeacons.beaconDictionary[currBeacon] = 1
                             if prevState == 0 {
                                 message += "welcome to \(region.identifier) - beacon: \(currBeacon.uuid) is visible\n"
                                 gotReport = true
@@ -156,7 +168,7 @@ extension AppDelegate: CLLocationManagerDelegate {
                         }
                     }
                     
-                    if prevState == 1 && hBeacons.beaconDictionary[currBeacon.uuid] == 0 {
+                    if prevState == 1 && hBeacons.beaconDictionary[currBeacon] == 0 {
                         message += "by by from \(currBeacon.identifier) - beacon: \(currBeacon.uuid) is no longer visible\n"
                         gotReport = true
                     }
