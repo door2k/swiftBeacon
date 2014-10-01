@@ -124,7 +124,7 @@ var state = 0
 extension AppDelegate: CLLocationManagerDelegate {
     
     func sendLocalNotificationWithMessage(message: String!) {
-        NSLog("%@", "Sending message \(message)")
+//        NSLog("%@", "Sending message \(message)")
         let notification:UILocalNotification = UILocalNotification()
         notification.alertBody = message
         UIApplication.sharedApplication().scheduleLocalNotification(notification)
@@ -134,33 +134,30 @@ extension AppDelegate: CLLocationManagerDelegate {
         didRangeBeacons beacons: [AnyObject]!,
         inRegion region: CLBeaconRegion!) {
             
-//            NSLog("didRangeBeacons");
             var message:String = ""
             var gotReport:Bool = false
-            
-            if(beacons.count > 0) {
-                NSLog("beacons.count = \(beacons.count)")
-            }
+//            
+//            if(beacons.count > 0) {
+//                NSLog("beacons.count = \(beacons.count)")
+//            }
             
             for (currBeacon: beacon) in hBeacons.list {
                 if (currBeacon.identifier == region.identifier) {
                     let prevState = hBeacons.beaconDictionary[currBeacon.uuid]
-                    hBeacons.beaconDictionary[currBeacon.uuid] = 0 // start from "beacon not found" and set to 1 if found.
-//                    NSLog("Examinig beacon: \(currBeacon.uuid)")
+                    hBeacons.beaconDictionary[currBeacon.uuid] = 0
                     for visibleBeacon in beacons {
                         var s: NSString = visibleBeacon.proximityUUID.description
-                        NSLog(s.substringFromIndex(s.length - 36))
                         if currBeacon.uuid == s.substringFromIndex(s.length - 36) {
                             hBeacons.beaconDictionary[currBeacon.uuid] = 1
                             if prevState == 0 {
-                                message += "beacon: \(currBeacon.uuid) is visible\n"
+                                message += "welcome to \(region.identifier) - beacon: \(currBeacon.uuid) is visible\n"
                                 gotReport = true
                             }
                         }
                     }
                     
                     if prevState == 1 && hBeacons.beaconDictionary[currBeacon.uuid] == 0 {
-                        message += "beacon: \(currBeacon.uuid) is no longer visible\n"
+                        message += "by by from \(currBeacon.identifier) - beacon: \(currBeacon.uuid) is no longer visible\n"
                         gotReport = true
                     }
                 }
