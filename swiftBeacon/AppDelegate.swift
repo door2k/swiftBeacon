@@ -57,7 +57,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
         
     func beaconDisappeared(notification: NSNotification) {
-        sendLocalNotificationWithMessage("welcome to: \((notification.object as beacon).identifier)")
+        sendLocalNotificationWithMessage("by by from: \((notification.object as beacon).identifier)")
     }
 
 
