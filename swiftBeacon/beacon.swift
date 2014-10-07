@@ -11,6 +11,17 @@ import UIKit
 import CoreLocation
 
 
+//
+//////////// HIGHLY IMPORTANT //////////////
+// using beacons require the system to allow getting location while in background
+// to do so you must go to the File manager -> Supporting Files --> info.plist.
+// On the first item (Information Property List add NSLocationAlwaysUsageDescription as string
+// and set it's value to the string that will pop up to the user.
+// 
+// CREDIT for beacon code + complete instructions:
+// http://ibeaconmodules.us/blogs/news/14702963-tutorial-swift-based-ibeacon-app-development-with-corelocation-on-apple-ios-7-8
+//
+
 func ==(lhs: beacon, rhs: beacon) -> Bool {
     return lhs.hashValue == rhs.hashValue
 }
