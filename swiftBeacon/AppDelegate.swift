@@ -10,62 +10,11 @@ import UIKit
 import CoreLocation
 
 
-func ==(lhs: beacon, rhs: beacon) -> Bool {
-    return lhs.hashValue == rhs.hashValue
-}
-
-class beacon : Hashable {
-    var uuid:String = ""
-    var identifier:String = ""
-    var minor = 0
-    var major = 0
-    
-    init (uuid: String, identifier:String = "Xoom") {
-        self.uuid = uuid
-        self.identifier = identifier
-        self.major = 0
-        self.minor = 0
-    }
-    
-    var hashValue: Int {
-        get {
-            return self.uuid.hashValue
-        }
-    }
-
-}
-
-class beaconHandler {
-    var list:[beacon] = []
-    var beaconDictionary:[beacon:Int] = [:]
-    
-    func register (locationManager: CLLocationManager?) {
-        for currBeacon in list {
-            NSLog(currBeacon.uuid)
-            
-            var region: CLBeaconRegion = CLBeaconRegion(proximityUUID:  NSUUID(UUIDString: currBeacon.uuid), identifier:     currBeacon.identifier)
-            
-            locationManager!.startMonitoringForRegion(region)
-            locationManager!.startRangingBeaconsInRegion(region)
-            
-        }
-
-    }
-    
-    func add (newBeacon : beacon) {
-        if beaconDictionary[newBeacon] == nil {
-            self.list += [newBeacon]
-            beaconDictionary[newBeacon] = 0
-        }
-    }
-}
-
-
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
-    var locationManager: CLLocationManager?
+    
 
     let uuidString = "B0702880-A295-A8AB-F734-031A98A512DE"
     let uuidString2 = "B0702880-A295-A8AB-F734-031A98A512DD"
@@ -75,23 +24,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
     
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool
     {
-        hBeacons.add(beacon(uuid: uuidString, identifier: "test1"))
-        hBeacons.add(beacon(uuid: uuidString2, identifier: "test2"))
+        hBeacons.add(beacon(uuid: uuidString, identifier: "living room (Mac mini)"))
+        hBeacons.add(beacon(uuid: uuidString2, identifier: "laptop (Mac air)"))
         
-        locationManager = CLLocationManager()
-        if(locationManager!.respondsToSelector("requestAlwaysAuthorization")) {
-            locationManager!.requestAlwaysAuthorization()
-        }
-        
-        locationManager!.delegate = self
-        locationManager!.pausesLocationUpdatesAutomatically = false
-//        
-//        var tempbeacon: CLBeaconRegion = CLBeaconRegion(proximityUUID:  NSUUID(UUIDString: self.uuidString),
-//                                                        identifier:     "test")
-//        locationManager!.startMonitoringForRegion(tempbeacon)
-//        locationManager!.startRangingBeaconsInRegion(tempbeacon)
-        
-        hBeacons.register(locationManager!)
+        hBeacons.register()
         
         if(application.respondsToSelector("registerUserNotificationSettings:")) {
             application.registerUserNotificationSettings(
@@ -102,9 +38,29 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
             )
         }
         
-//        application.applicationIconBadgeNumber = 0
+        
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "beaconVisible:", name: "beaconVisible", object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "beaconDisappeared:", name: "beaconDisappeared", object: nil)
+
         return true
     }
+    
+    func sendLocalNotificationWithMessage(message: String!) {
+        //        NSLog("%@", "Sending message \(message)")
+        let notification:UILocalNotification = UILocalNotification()
+        notification.alertBody = message
+        UIApplication.sharedApplication().scheduleLocalNotification(notification)
+    }
+        
+    func beaconVisible(notification: NSNotification) {
+        sendLocalNotificationWithMessage("welcome to: \((notification.object as beacon).identifier)")
+    }
+        
+    func beaconDisappeared(notification: NSNotification) {
+        sendLocalNotificationWithMessage("welcome to: \((notification.object as beacon).identifier)")
+    }
+
+
 
     func applicationWillResignActive(application: UIApplication) {
         // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
@@ -131,54 +87,3 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
 
 }
 
-var state = 0
-
-extension AppDelegate: CLLocationManagerDelegate {
-    
-    func sendLocalNotificationWithMessage(message: String!) {
-//        NSLog("%@", "Sending message \(message)")
-        let notification:UILocalNotification = UILocalNotification()
-        notification.alertBody = message
-        UIApplication.sharedApplication().scheduleLocalNotification(notification)
-    }
-    
-    func locationManager(manager: CLLocationManager!,
-        didRangeBeacons beacons: [AnyObject]!,
-        inRegion region: CLBeaconRegion!) {
-            
-            var message:String = ""
-            var gotReport:Bool = false
-//            
-//            if(beacons.count > 0) {
-//                NSLog("beacons.count = \(beacons.count)")
-//            }
-            
-            for (currBeacon: beacon) in hBeacons.list {
-                if (currBeacon.identifier == region.identifier) {
-                    let prevState = hBeacons.beaconDictionary[currBeacon]
-                    hBeacons.beaconDictionary[currBeacon] = 0
-                    for visibleBeacon in beacons {
-                        var s: NSString = visibleBeacon.proximityUUID.description
-                        if currBeacon.uuid == s.substringFromIndex(s.length - 36) {
-                            hBeacons.beaconDictionary[currBeacon] = 1
-                            if prevState == 0 {
-                                message += "welcome to \(region.identifier) - beacon: \(currBeacon.uuid) is visible\n"
-                                gotReport = true
-                            }
-                        }
-                    }
-                    
-                    if prevState == 1 && hBeacons.beaconDictionary[currBeacon] == 0 {
-                        message += "by by from \(currBeacon.identifier) - beacon: \(currBeacon.uuid) is no longer visible\n"
-                        gotReport = true
-                    }
-                }
-            }
-            
-            if gotReport {
-                NSNotificationCenter.defaultCenter().postNotification(NSNotification(name: "beaconsUpdate", object: nil))
-                NSLog("%@", message)
-                sendLocalNotificationWithMessage(message)
-            }
-    }
-}

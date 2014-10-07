@@ -14,6 +14,7 @@
 		A76D46AF19D9794000C706F0 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = A76D46AD19D9794000C706F0 /* LaunchScreen.xib */; };
 		A76D46BB19D9794000C706F0 /* swiftBeaconTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A76D46BA19D9794000C706F0 /* swiftBeaconTests.swift */; };
 		A76D46C519D979F900C706F0 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A76D46C419D979F900C706F0 /* CoreLocation.framework */; };
+		A79979D019E3EBBE0075FFA2 /* beacon.swift in Sources */ = {isa = PBXBuildFile; fileRef = A79979CF19E3EBBE0075FFA2 /* beacon.swift */; };
 		A7AD55D219DAD46C0032F1F6 /* TableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7AD55D119DAD46C0032F1F6 /* TableViewController.swift */; };
 /* End PBXBuildFile section */
 
@@ -39,6 +40,7 @@
 		A76D46B919D9794000C706F0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A76D46BA19D9794000C706F0 /* swiftBeaconTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = swiftBeaconTests.swift; sourceTree = "<group>"; };
 		A76D46C419D979F900C706F0 /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
+		A79979CF19E3EBBE0075FFA2 /* beacon.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = beacon.swift; sourceTree = "<group>"; };
 		A7AD55D119DAD46C0032F1F6 /* TableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TableViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -90,6 +92,7 @@
 				A76D46AB19D9794000C706F0 /* Images.xcassets */,
 				A76D46AD19D9794000C706F0 /* LaunchScreen.xib */,
 				A76D46A219D9794000C706F0 /* Supporting Files */,
+				A79979CF19E3EBBE0075FFA2 /* beacon.swift */,
 			);
 			path = swiftBeacon;
 			sourceTree = "<group>";
@@ -228,6 +231,7 @@
 				A76D46A719D9794000C706F0 /* ViewController.swift in Sources */,
 				A7AD55D219DAD46C0032F1F6 /* TableViewController.swift in Sources */,
 				A76D46A519D9794000C706F0 /* AppDelegate.swift in Sources */,
+				A79979D019E3EBBE0075FFA2 /* beacon.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
