@@ -16,8 +16,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
     
 
-    let uuidString = "B0702880-A295-A8AB-F734-031A98A512DE"
-    let uuidString2 = "B0702880-A295-A8AB-F734-031A98A512DD"
+    let uuidString = "B48AC6FE-2CB5-4F5A-B95F-058CE7127685"
+    let uuidString2 = "1CCA025F-5B41-4390-9005-C375347C7C83"
 
     var hBeacons: beaconHandler = beaconHandler()
     
